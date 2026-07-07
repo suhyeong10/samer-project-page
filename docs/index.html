@@ -234,18 +234,6 @@
 </section>
 
 
-<!-- Method overview figure -->
-<section class="hero teaser">
-  <div class="container is-max-desktop">
-    <div class="hero-body">
-      <img src="static/images/architecture.png" alt="SaMer method overview: feature-spatial merging, object-aware assignment, and projection-only adaptation." loading="lazy" style="width:100%; height:auto; border-radius:8px;"/>
-      <h2 class="subtitle has-text-centered" style="margin-top:1rem;">
-        SaMer compresses post-projector visual tokens with an object-aware feature-spatial merge, then scores with the original MaxSim objective &mdash; at inference it is entirely bbox-free.
-      </h2>
-    </div>
-  </div>
-</section>
-<!-- End method overview figure -->
 
 <!-- Paper abstract -->
 <section class="section hero is-light">
@@ -287,36 +275,55 @@
     <div class="columns is-centered">
       <div class="column is-full">
         <h2 class="title is-3 has-text-centered">Method</h2>
-        <div class="content has-text-justified">
+
+        <figure class="image" style="margin: 0 0 1.5rem;">
+          <img src="static/images/architecture.png" alt="SaMer method overview: feature-spatial merging, object-aware assignment, and projection-only adaptation." loading="lazy" style="width:100%; height:auto; border-radius:8px;"/>
+        </figure>
+        <p class="table-caption has-text-centered" style="margin-top:-0.75rem;">
+          SaMer compresses post-projector visual tokens with an object-aware feature-spatial merge, then scores with the original MaxSim objective &mdash; at inference it is entirely bbox-free.
+        </p>
+
+        <div class="content">
           <p>
             SaMer replaces the dense grid of image-side tokens used by ColPali-style retrievers with a small set
             of merged region tokens, produced by three coordinated components:
           </p>
-          <div class="columns" style="margin-top:1rem;">
-            <div class="column">
-              <div class="box" style="height:100%;">
-                <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-object-group"></i></span><span>&nbsp;Feature-Spatial Merging</span></span></h3>
-                <p>Clusters visual tokens using a combination of feature similarity and normalized 2D spatial
-                proximity, so that merged regions stay both semantically and spatially coherent.</p>
-              </div>
-            </div>
-            <div class="column">
-              <div class="box" style="height:100%;">
-                <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-vector-square"></i></span><span>&nbsp;Object-Aware Assignment</span></span></h3>
-                <p>During training, Flickr30k-Entities boxes provide instance labels that bias the
-                differentiable merge toward object-consistent clusters through an additive inconsistency
-                penalty &mdash; with no bbox or grounding loss.</p>
-              </div>
-            </div>
-            <div class="column">
-              <div class="box" style="height:100%;">
-                <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-layer-group"></i></span><span>&nbsp;Projection-Only Adaptation</span></span></h3>
-                <p>Freezes the vision encoder and language backbone and trains only the shared projection
-                layer under the retrieval loss, keeping the adaptation lightweight and stable.</p>
-              </div>
+        </div>
+        <div class="columns" style="margin-top:0.5rem;">
+          <div class="column">
+            <div class="box" style="height:100%;">
+              <h3 class="title is-5">
+                <span class="icon has-text-info"><i class="fas fa-object-group"></i></span>
+                Feature-Spatial Merging
+              </h3>
+              <p>Clusters visual tokens using a combination of feature similarity and normalized 2D spatial
+              proximity, so that merged regions stay both semantically and spatially coherent.</p>
             </div>
           </div>
-          <p style="margin-top:1rem;">
+          <div class="column">
+            <div class="box" style="height:100%;">
+              <h3 class="title is-5">
+                <span class="icon has-text-info"><i class="fas fa-vector-square"></i></span>
+                Object-Aware Assignment
+              </h3>
+              <p>During training, Flickr30k-Entities boxes provide instance labels that bias the
+              differentiable merge toward object-consistent clusters through an additive inconsistency
+              penalty &mdash; with no bbox or grounding loss.</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="box" style="height:100%;">
+              <h3 class="title is-5">
+                <span class="icon has-text-info"><i class="fas fa-layer-group"></i></span>
+                Projection-Only Adaptation
+              </h3>
+              <p>Freezes the vision encoder and language backbone and trains only the shared projection
+              layer under the retrieval loss, keeping the adaptation lightweight and stable.</p>
+            </div>
+          </div>
+        </div>
+        <div class="content" style="margin-top:1rem;">
+          <p>
             At inference SaMer is <strong>bbox-free</strong>: it applies the same feature-spatial merge before
             MaxSim scoring. The default configuration merges to <strong>K&nbsp;=&nbsp;64</strong> region tokens
             with <strong>3</strong> clustering iterations, a spatial weight of <strong>0.1</strong>, and an
@@ -329,39 +336,6 @@
   </div>
 </section>
 <!-- End Method -->
-
-
-<!-- Setup / Experiments -->
-<section class="section hero is-light">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered">
-      <div class="column is-four-fifths">
-        <h2 class="title is-3 has-text-centered">Experimental Setup</h2>
-        <div class="content has-text-justified">
-          <p>
-            We train and evaluate SaMer for text-to-image retrieval on <strong>Flickr30k-Entities</strong>.
-            Training optimizes a multi-positive text-to-image contrastive loss (temperature 0.07); box
-            annotations are used only to supervise the merge assignment and are never required at inference or
-            cache-building time. Retrieval quality is reported with standard ranking metrics:
-          </p>
-          <ul>
-            <li><strong>Recall@1 / @5 / @10</strong> &mdash; fraction of queries whose ground-truth image is ranked within the top-<em>k</em>.</li>
-            <li><strong>MRR</strong> &mdash; mean reciprocal rank of the first relevant image.</li>
-            <li><strong>nDCG</strong> &mdash; normalized discounted cumulative gain over the ranked list.</li>
-          </ul>
-          <p>
-            The pipeline builds a compressed retrieval cache from the trained projector, then scores queries
-            against merged image-side tokens with MaxSim &mdash; storing only <em>K</em> region tokens per image
-            instead of the full token grid. See the
-            <a href="https://github.com/dmis-lab/SaMer" target="_blank">code repository</a> for training,
-            caching, and evaluation scripts.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-<!-- End Setup -->
 
 
 <!-- Results -->
