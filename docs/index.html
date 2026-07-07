@@ -57,9 +57,8 @@
 
   <title>SaMer &mdash; Object-Evidence Preserving Token Merging for Vision-Language Retrieval</title>
 
-  <!-- Favicon and App Icons -->
-  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
-  <link rel="apple-touch-icon" href="static/images/favicon.ico">
+  <!-- No custom favicon (browser default). -->
+  <link rel="icon" href="data:,">
 
   <!-- Critical CSS - Load synchronously -->
   <link rel="stylesheet" href="static/css/bulma.min.css">
@@ -111,9 +110,10 @@
 
     /* Simple one-per-screen carousel */
     .simple-carousel { position: relative; margin: 0 auto; max-width: 1120px; }
-    .sc-viewport { overflow: hidden; }
-    .sc-track { display: flex; transition: transform 0.45s ease; will-change: transform; }
-    .sc-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0.5rem 3rem 0.5rem; text-align: center; }
+    .sc-viewport { overflow: hidden; transition: height 0.45s ease; }
+    .sc-track { display: flex; align-items: flex-start; transition: transform 0.45s ease; will-change: transform; }
+    .sc-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0.5rem 3rem 0.5rem; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; }
     .sc-slide img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
     .sc-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
       width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
@@ -470,18 +470,24 @@
   <script>
   (function(){
     function initCarousel(root){
-      var track=root.querySelector('.sc-track'), slides=root.querySelectorAll('.sc-slide');
+      var viewport=root.querySelector('.sc-viewport'), track=root.querySelector('.sc-track'), slides=root.querySelectorAll('.sc-slide');
       var prev=root.querySelector('.sc-prev'), next=root.querySelector('.sc-next'), dotsWrap=root.querySelector('.sc-dots');
       var n=slides.length, idx=0, timer=null, delay=parseInt(root.getAttribute('data-autoplay')||'0',10), dots=[];
       if(!track||!n) return;
       if(dotsWrap){for(var i=0;i<n;i++){(function(i){var b=document.createElement('button');b.setAttribute('aria-label','Go to slide '+(i+1));b.addEventListener('click',function(){go(i);restart();});dotsWrap.appendChild(b);dots.push(b);})(i);}}
-      function render(){track.style.transform='translateX('+(-idx*100)+'%)';dots.forEach(function(d,i){d.classList.toggle('active',i===idx);});}
+      function fit(){if(viewport&&slides[idx])viewport.style.height=slides[idx].offsetHeight+'px';}
+      function render(){track.style.transform='translateX('+(-idx*100)+'%)';dots.forEach(function(d,i){d.classList.toggle('active',i===idx);});fit();}
       function go(i){idx=(i+n)%n;render();}
       function restart(){if(delay>0){clearInterval(timer);timer=setInterval(function(){go(idx+1);},delay);}}
       if(prev)prev.addEventListener('click',function(){go(idx-1);restart();});
       if(next)next.addEventListener('click',function(){go(idx+1);restart();});
       root.addEventListener('mouseenter',function(){clearInterval(timer);});
       root.addEventListener('mouseleave',restart);
+      // keep the frame sized to the active slide as images load / the window resizes
+      Array.prototype.forEach.call(root.querySelectorAll('img'),function(img){
+        if(!img.complete)img.addEventListener('load',fit);
+      });
+      window.addEventListener('resize',fit);
       render();restart();
     }
     function boot(){Array.prototype.forEach.call(document.querySelectorAll('.simple-carousel'),initCarousel);}
