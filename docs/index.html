@@ -414,13 +414,9 @@
   <div class="container is-max-widescreen">
     <div class="columns is-centered">
       <div class="column is-full">
-        <h2 class="title is-3 has-text-centered">Results</h2>
-        <p class="carousel-hint">Auto-advances every few seconds &mdash; use the &#8249;&nbsp;&#8250; arrows to browse all result tables.</p>
-
-        <div id="results-carousel" class="carousel results-carousel">
-          <div class="item">
-            <div class="table-slide-title">Table 1 &mdash; Retriever-only results across four benchmarks</div>
-            <div class="table-scroll">
+        <h2 class="title is-3 has-text-centered">Main Results</h2>
+        <h3 class="title is-5 has-text-centered">Retriever-only results across four benchmarks</h3>
+        <div class="table-scroll">
           <table class="results-table">
             <thead>
               <tr class="group-row">
@@ -468,9 +464,22 @@
           </table>
         </div>
         <p class="table-caption"><strong>Table 1.</strong> Retriever-only results across four benchmarks. SaMer compresses the image-side representation to <em>K</em>&nbsp;=&nbsp;64 tokens and is compared with compression baselines applied to the same backbone when available. Shaded rows indicate SaMer variants. <strong>Bold</strong> and <span class="u">underline</span> indicate the best and second-best results within each method group or backbone family.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Main Results -->
 
-          </div>
 
+<!-- Analysis -->
+<section class="section hero is-light">
+  <div class="container is-max-widescreen">
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">Analysis</h2>
+        <p class="carousel-hint">Auto-advances every few seconds &mdash; use the &#8249;&nbsp;&#8250; arrows to browse the analysis tables.</p>
+
+        <div id="results-carousel" class="carousel results-carousel">
           <div class="item">
             <div class="table-slide-title">Table 2 &mdash; Adapted compression at <em>K</em> = 64 (projection-only)</div>
             <div class="table-scroll">
@@ -603,9 +612,19 @@
           </div>
         </div>
         <!-- End results carousel -->
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Analysis -->
 
-        <!-- Figure 4: qualitative grounding examples -->
-        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;">Qualitative grounding examples</h3>
+
+<!-- Qualitative -->
+<section class="section">
+  <div class="container is-max-widescreen">
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">Qualitative Grounding Examples</h2>
         <div class="content has-text-justified">
           <p>
             Red denotes the phrase-relevance map and green denotes the ground-truth box for the highlighted
