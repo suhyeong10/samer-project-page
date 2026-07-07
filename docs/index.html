@@ -84,19 +84,28 @@
 
   <!-- Results table styling -->
   <style>
+    /* booktabs-style tables to match the paper */
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1.25rem; }
-    table.results-table { border-collapse: collapse; width: 100%; font-size: 0.9rem; white-space: nowrap; }
-    table.results-table th, table.results-table td { padding: 0.4rem 0.65rem; text-align: center; }
-    table.results-table thead th { border-bottom: 2px solid #2f3542; font-weight: 700; }
-    table.results-table thead tr.group-row th { border-bottom: 1px solid #c5ccd6; }
+    table.results-table { border-collapse: collapse; width: auto; min-width: 60%; max-width: 100%;
+      margin: 0 auto; font-size: 0.9rem; white-space: nowrap;
+      font-family: Georgia, "Times New Roman", "Nimbus Roman", serif;
+      border-top: 1.7px solid #1a1a1a; }
+    table.results-table th, table.results-table td { padding: 0.3rem 0.8rem; text-align: center; border: none; }
+    table.results-table thead th { font-weight: 700; }
+    /* midrule below the full header block (incl. rowspan cells) */
+    table.results-table thead tr:last-child th,
+    table.results-table thead tr.group-row th[rowspan] { border-bottom: 1.2px solid #1a1a1a; }
+    /* cmidrule under grouped column headers */
+    table.results-table thead tr.group-row th[colspan] { border-bottom: 0.8px solid #888; }
+    /* bottomrule */
+    table.results-table tbody tr:last-child td { border-bottom: 1.7px solid #1a1a1a; }
     table.results-table tbody td:first-child, table.results-table th:first-child { text-align: left; white-space: nowrap; }
-    table.results-table tbody tr td { border-bottom: 1px solid #edf0f4; }
-    table.results-table .group-label td { font-style: italic; font-weight: 600; padding-top: 0.75rem; border-bottom: none; }
-    table.results-table .indent { padding-left: 1.4rem; }
-    table.results-table .samer-row { background: #e6f4ea; }
+    table.results-table .group-label td { font-style: italic; font-weight: 600; text-align: left; padding-top: 0.55rem; }
+    table.results-table .indent { padding-left: 1.5rem; }
+    table.results-table .samer-row { background: #E4F4E8; }
     table.results-table .b { font-weight: 700; }
     table.results-table .u { text-decoration: underline; }
-    table.results-table .divider { border-left: 2px solid #c5ccd6; }
+    table.results-table .divider { border-left: 1px solid #b8b8b8; }
     .table-caption { font-size: 0.85rem; color: #555; margin: 0.25rem 0 2.25rem; }
     .table-caption strong { color: #333; }
 
