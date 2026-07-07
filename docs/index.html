@@ -109,16 +109,26 @@
     .table-caption { font-size: 0.85rem; color: #555; margin: 0.25rem 0 2.25rem; }
     .table-caption strong { color: #333; }
 
-    /* Results / figures carousels — exactly one item per screen */
-    .results-carousel .item { padding: 0.5rem 0.5rem 0.25rem; text-align: center; }
-    .results-carousel .item img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
-    .results-carousel .slide-img-wrap { display: flex; justify-content: center; align-items: center; }
-    .results-carousel .table-slide-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.6rem; text-align: center; }
-    .results-carousel .table-caption { margin: 0.5rem auto 0.25rem; max-width: 900px; text-align: center; }
-    /* keep nav arrows clear of content */
-    .results-carousel.slider .slider-navigation-previous { left: 0; }
-    .results-carousel.slider .slider-navigation-next { right: 0; }
-    .carousel-hint { font-size: 0.8rem; color: #8a94a6; text-align: center; margin-top: 0.25rem; }
+    /* Simple one-per-screen carousel */
+    .simple-carousel { position: relative; margin: 0 auto; max-width: 1120px; }
+    .sc-viewport { overflow: hidden; }
+    .sc-track { display: flex; transition: transform 0.45s ease; will-change: transform; }
+    .sc-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0.5rem 3rem 0.5rem; text-align: center; }
+    .sc-slide img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+    .sc-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+      width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(37,99,235,0.85); color: #fff; font-size: 1.4rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center; }
+    .sc-btn:hover { background: #2563eb; }
+    .sc-prev { left: 0; }
+    .sc-next { right: 0; }
+    .sc-dots { text-align: center; margin-top: 0.5rem; }
+    .sc-dots button { width: 9px; height: 9px; border-radius: 50%; border: none; margin: 0 4px;
+      background: #cbd3e1; cursor: pointer; padding: 0; }
+    .sc-dots button.active { background: #2563eb; }
+    .carousel-hint { font-size: 0.8rem; color: #8a94a6; text-align: center; margin: 0.25rem 0 0.75rem; }
+    /* one equation per method card */
+    .card-eq { margin-top: 0.75rem; text-align: center; overflow-x: auto; overflow-y: hidden; font-size: 0.95rem; }
   </style>
 
   <!-- Defer non-critical JavaScript -->
@@ -328,8 +338,9 @@
           <div class="column">
             <div class="box" style="height:100%;">
               <h3 class="title is-5"><span class="icon has-text-info"><i class="fas fa-object-group"></i></span> Feature-Spatial Merging</h3>
-              <p>Compresses the \(N\) post-projector visual tokens into \(K\) representative centroids by soft
-              assignment over a distance that combines feature similarity and 2D spatial coherence.</p>
+              <p>Compresses the many post-projector visual tokens into a small set of representative centroids by
+              soft assignment over a distance that combines feature similarity and 2D spatial coherence.</p>
+              <div class="card-eq">\[ d(i,k)=\bigl(1-v_i^\top\mu_k\bigr)+\gamma\lVert p_i-s_k\rVert^2 \]</div>
             </div>
           </div>
           <div class="column">
@@ -338,6 +349,7 @@
               <p>During training only, object annotations add an instance-inconsistency penalty that discourages
               merging tokens from different object instances &mdash; no auxiliary grounding loss, no boxes at
               inference.</p>
+              <div class="card-eq">\[ a_{i,k}\propto\exp\!\Bigl(-\tfrac{d(i,k)+P_{\mathrm{inst}}(i,k)}{\tau_s}\Bigr) \]</div>
             </div>
           </div>
           <div class="column">
@@ -345,70 +357,9 @@
               <h3 class="title is-5"><span class="icon has-text-info"><i class="fas fa-layer-group"></i></span> Projection-Only Adaptation</h3>
               <p>Freezes the vision encoder and language backbone and trains only the shared projection layer, so
               merged tokens stay compatible with MaxSim scoring.</p>
+              <div class="card-eq">\[ S_K(q,I)=\tfrac{1}{M}\sum_{j}\max_{k}\,q_j^\top r_k \]</div>
             </div>
           </div>
-        </div>
-
-        <div class="content has-text-justified" style="margin-top:2rem;">
-          <h3 class="title is-5">Multi-vector late interaction</h3>
-          <p>
-            An image \(I\) is encoded into \(N\) visual tokens \(V(I)=\{v_i\}_{i=1}^{N}\) and a query \(q\) into
-            \(M\) tokens \(Q(q)=\{q_j\}_{j=1}^{M}\), all projected into a shared \(D\)-dimensional space. The
-            MaxSim late-interaction score matches each query token to its most similar visual token:
-          </p>
-          \[ S(q,I) = \frac{1}{M}\sum_{j=1}^{M}\max_{i\in[N]} q_j^\top v_i . \]
-          <p>
-            Because every query token is compared with every visual token, the number of image-side tokens
-            \(N\) is the bottleneck for both storage and scoring.
-          </p>
-
-          <h3 class="title is-5">Post-projector token merging</h3>
-          <p>
-            Each token \(v_i\) has a normalized coordinate \(p_i\in[0,1]^2\); each representative \(k\) keeps a
-            feature centroid \(\mu_k\) and spatial centroid \(s_k\). SaMer assigns tokens with a distance that
-            combines feature similarity and spatial coherence,
-          </p>
-          \[ d(i,k) = \underbrace{\left(1-v_i^\top \mu_k\right)}_{\text{feature}} + \gamma\,\underbrace{\left\|p_i-s_k\right\|_2^2}_{\text{spatial}}, \]
-          <p>
-            where \(\gamma\) controls the spatial term. The distances become soft assignment weights, and each
-            representative is formed as an \(\ell_2\)-normalized weighted centroid:
-          </p>
-          \[ a_{i,k} = \mathrm{softmax}_{k}\!\left(-\frac{d(i,k)}{\tau_s}\right), \qquad r_k = \mathrm{normalize}_2\!\left(\frac{\sum_{i} a_{i,k}\,v_i}{\sum_{i} a_{i,k}}\right). \]
-          <p>
-            The compressed set \(R(I)=\{r_k\}_{k=1}^{K}\) is scored with the same rule, now over \(K \ll N\)
-            merged tokens:
-          </p>
-          \[ S_K(q,I) = \frac{1}{M}\sum_{j=1}^{M}\max_{k\in[K]} q_j^\top r_k . \]
-
-          <h3 class="title is-5">Object-aware merge prior</h3>
-          <p>
-            When object annotations are available at training time, a stop-gradient hard assignment
-            \(c_i=\arg\min_{k} d(i,k)\) estimates each representative's box-label distribution \(P_k(b)\), giving
-            an instance-inconsistency penalty:
-          </p>
-          \[ P_k(b) = \frac{\sum_{i}\mathbf{1}[c_i=k]\,\mathbf{1}[b_i=b]}{\sum_{i}\mathbf{1}[c_i=k]+\epsilon}, \qquad P_{\mathrm{inst}}(i,k) = 1-P_k(b_i). \]
-          <p>
-            This penalty is added to the feature-spatial distance so that cross-instance assignments receive
-            lower weight:
-          </p>
-          \[ a_{i,k} = \mathrm{softmax}_{k}\!\left(-\frac{d(i,k)+P_{\mathrm{inst}}(i,k)}{\tau_s}\right). \]
-          <p>
-            The penalty is used only during training; at inference SaMer performs bbox-free feature-spatial soft
-            assignment, with the object prior baked into the adapted projection space.
-          </p>
-
-          <h3 class="title is-5">Projection-only adaptation</h3>
-          <p>
-            Only the shared projection layer is trained &mdash; merging adds no learnable parameters, yet
-            gradients from the compressed score still flow through the soft-assignment centroids. SaMer is
-            optimized with a multi-positive InfoNCE retrieval loss over compressed MaxSim scores:
-          </p>
-          \[ \mathcal{L}_{ret} = -\log \frac{\sum_{I^+\in\mathcal{P}(q)} \exp\!\big(S_K(q,I^+)/\tau\big)}{\sum_{I\in\mathcal{B}} \exp\!\big(S_K(q,I)/\tau\big)}, \]
-          <p>
-            where \(\mathcal{P}(q)\) is the positive set for query \(q\), \(\mathcal{B}\) the batch candidates,
-            and \(\tau\) the temperature. In the main experiments SaMer uses \(K=64\), adapts the projection
-            layer for 3 epochs on Flickr30K-Entities, and keeps both backbones frozen.
-          </p>
         </div>
       </div>
     </div>
@@ -423,10 +374,9 @@
     <div class="columns is-centered">
       <div class="column is-full">
         <h2 class="title is-3 has-text-centered">Main Results</h2>
-        <figure class="image" style="margin: 0 auto 0.5rem; max-width: 1100px;">
+        <figure class="image" style="margin: 0 auto; max-width: 1100px;">
           <img src="static/images/paper/table1.png" alt="Table 1: Retriever-only results across four benchmarks" loading="lazy" style="width:100%; height:auto;"/>
         </figure>
-        <p class="table-caption has-text-centered"><strong>Table 1.</strong> Retriever-only results across four benchmarks. SaMer compresses the image-side representation to \(K=64\) tokens and is compared with compression baselines applied to the same backbone when available. Shaded rows indicate SaMer variants; <strong>bold</strong> and <span class="u">underline</span> indicate the best and second-best results within each method group or backbone family.</p>
       </div>
     </div>
   </div>
@@ -443,77 +393,36 @@
 
         <h3 class="title is-4 has-text-centered">Tables</h3>
         <p class="carousel-hint">Auto-advances every few seconds &mdash; use the &#8249;&nbsp;&#8250; arrows to browse one table at a time.</p>
-        <div id="tables-carousel" class="carousel results-carousel">
-          <div class="item">
-            <div class="table-slide-title">Table 2 &mdash; Adapted compression at \(K=64\) (projection-only)</div>
-            <div class="slide-img-wrap"><img src="static/images/paper/table2.png" alt="Table 2: Adapted compression at K=64 under projection-only adaptation" loading="lazy" style="max-width:660px;"></div>
-            <p class="table-caption"><strong>Table 2.</strong> Adapted compression at \(K=64\) under projection-only adaptation. Shaded rows indicate SaMer; bold and underline denote best and second-best.</p>
-          </div>
-          <div class="item">
-            <div class="table-slide-title">Table 3 &mdash; Compression budget analysis</div>
-            <div class="slide-img-wrap"><img src="static/images/paper/table3.png" alt="Table 3: Compression budget analysis as K varies" loading="lazy" style="max-width:660px;"></div>
-            <p class="table-caption"><strong>Table 3.</strong> Compression budget analysis on Flickr30K and MSCOCO as \(K\) varies. \(K=64\) gives a favorable quality/compression trade-off.</p>
-          </div>
-          <div class="item">
-            <div class="table-slide-title">Table 4 &mdash; Component ablation</div>
-            <div class="slide-img-wrap"><img src="static/images/paper/table4.png" alt="Table 4: Feature, spatial, and object-aware component ablation" loading="lazy" style="max-width:660px;"></div>
-            <p class="table-caption"><strong>Table 4.</strong> SaMer combines feature, spatial, and object-aware components; the object-aware prior drives the largest grounding gains alongside the best retrieval.</p>
-          </div>
-          <div class="item">
-            <div class="table-slide-title">Table 5 &mdash; Efficiency under the same late-interaction interface</div>
-            <div class="slide-img-wrap"><img src="static/images/paper/table5.png" alt="Table 5: Storage, MaxSim ops, and QPS efficiency" loading="lazy" style="max-width:1000px;"></div>
-            <p class="table-caption"><strong>Table 5.</strong> SaMer reduces image-side storage and MaxSim operations while improving query throughput. Parentheses indicate improvement over the corresponding full multi-vector retriever.</p>
-          </div>
+        <div class="simple-carousel" data-autoplay="6000">
+          <div class="sc-viewport"><div class="sc-track">
+            <div class="sc-slide"><img src="static/images/paper/table2.png" alt="Table 2: Adapted compression at K=64 under projection-only adaptation" loading="lazy" style="max-width:680px;"></div>
+            <div class="sc-slide"><img src="static/images/paper/table3.png" alt="Table 3: Compression budget analysis as K varies" loading="lazy" style="max-width:680px;"></div>
+            <div class="sc-slide"><img src="static/images/paper/table4.png" alt="Table 4: Feature, spatial, and object-aware component ablation" loading="lazy" style="max-width:680px;"></div>
+            <div class="sc-slide"><img src="static/images/paper/table5.png" alt="Table 5: Storage, MaxSim ops, and QPS efficiency" loading="lazy" style="max-width:1000px;"></div>
+          </div></div>
+          <button class="sc-btn sc-prev" aria-label="Previous table">&#8249;</button>
+          <button class="sc-btn sc-next" aria-label="Next table">&#8250;</button>
+          <div class="sc-dots"></div>
         </div>
 
         <h3 class="title is-4 has-text-centered" style="margin-top:3rem;">Figures</h3>
         <p class="carousel-hint">Auto-advances every few seconds &mdash; use the &#8249;&nbsp;&#8250; arrows to browse one figure at a time.</p>
-        <div id="figures-carousel" class="carousel results-carousel">
-          <div class="item">
-            <div class="table-slide-title">Figure 2 &mdash; Token budget and R@5 trade-off</div>
-            <div class="slide-img-wrap"><img src="static/images/paper/figure2.png" alt="Figure 2: Token budget vs R@5 trade-off" loading="lazy" style="max-width:660px;"></div>
-            <p class="table-caption"><strong>Figure 2.</strong> Token budget and R@5 trade-off. SaMer shows diminishing returns beyond \(K=64\) and outperforms baselines under the same budget.</p>
-          </div>
-          <div class="item">
-            <div class="table-slide-title">Figure 3 &mdash; Grounding comparison</div>
-            <div class="slide-img-wrap"><img src="static/images/paper/figure3.png" alt="Figure 3: Grounding comparison (BoxMass, RegionHit, CoverageIoU)" loading="lazy" style="max-width:660px;"></div>
-            <p class="table-caption"><strong>Figure 3.</strong> Grounding comparison between full ColPali, compression baselines, and SaMer variants. SaMer improves localization and evidence concentration under compression.</p>
-          </div>
+        <div class="simple-carousel" data-autoplay="6000">
+          <div class="sc-viewport"><div class="sc-track">
+            <div class="sc-slide"><img src="static/images/paper/figure2.png" alt="Figure 2: Token budget vs R@5 trade-off" loading="lazy" style="max-width:680px;"></div>
+            <div class="sc-slide"><img src="static/images/paper/figure3.png" alt="Figure 3: Grounding comparison (BoxMass, RegionHit, CoverageIoU)" loading="lazy" style="max-width:680px;"></div>
+            <div class="sc-slide"><img src="static/images/qualitative_single_vs_multi.png" alt="Figure 4a: Qualitative grounding vs single-vector baselines and full multi-vector retrievers" loading="lazy" style="max-width:1100px;"></div>
+            <div class="sc-slide"><img src="static/images/qualitative_compression.png" alt="Figure 4b: Qualitative grounding vs compression methods applied to multi-vector retrievers" loading="lazy" style="max-width:1100px;"></div>
+          </div></div>
+          <button class="sc-btn sc-prev" aria-label="Previous figure">&#8249;</button>
+          <button class="sc-btn sc-next" aria-label="Next figure">&#8250;</button>
+          <div class="sc-dots"></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 <!-- End Analysis -->
-
-
-<!-- Qualitative -->
-<section class="section">
-  <div class="container is-max-widescreen">
-    <div class="columns is-centered">
-      <div class="column is-full">
-        <h2 class="title is-3 has-text-centered">Qualitative Grounding Examples</h2>
-        <div class="content has-text-justified">
-          <p>
-            Red denotes the phrase-relevance map and green denotes the ground-truth box for the highlighted
-            phrase. Across both settings, SaMer better concentrates phrase relevance inside the annotated region,
-            while compression baselines often spread relevance to nearby objects or background regions.
-          </p>
-        </div>
-        <figure class="image" style="margin: 0 0 0.75rem;">
-          <img src="static/images/qualitative_single_vs_multi.png" alt="Qualitative grounding: comparison with single-vector baselines, full multi-vector retrievers, and SaMer variants." loading="lazy" style="width:100%; height:auto; border-radius:6px;"/>
-        </figure>
-        <p class="table-caption"><strong>(a)</strong> Comparison with single-vector baselines, full multi-vector retrievers, and SaMer variants.</p>
-        <figure class="image" style="margin: 0 0 0.75rem;">
-          <img src="static/images/qualitative_compression.png" alt="Qualitative grounding: comparison with compression methods applied to multi-vector retrievers." loading="lazy" style="width:100%; height:auto; border-radius:6px;"/>
-        </figure>
-        <p class="table-caption"><strong>Figure 4.</strong> Qualitative grounding examples. <strong>(b)</strong> Comparison with compression methods applied to multi-vector retrievers. SaMer keeps relevance concentrated on the ground-truth region under compression.</p>
-
-      </div>
-    </div>
-  </div>
-</section>
-<!-- End Results -->
 
 
 <!--BibTex citation -->
@@ -557,6 +466,28 @@
 </footer>
 
   </main>
+
+  <script>
+  (function(){
+    function initCarousel(root){
+      var track=root.querySelector('.sc-track'), slides=root.querySelectorAll('.sc-slide');
+      var prev=root.querySelector('.sc-prev'), next=root.querySelector('.sc-next'), dotsWrap=root.querySelector('.sc-dots');
+      var n=slides.length, idx=0, timer=null, delay=parseInt(root.getAttribute('data-autoplay')||'0',10), dots=[];
+      if(!track||!n) return;
+      if(dotsWrap){for(var i=0;i<n;i++){(function(i){var b=document.createElement('button');b.setAttribute('aria-label','Go to slide '+(i+1));b.addEventListener('click',function(){go(i);restart();});dotsWrap.appendChild(b);dots.push(b);})(i);}}
+      function render(){track.style.transform='translateX('+(-idx*100)+'%)';dots.forEach(function(d,i){d.classList.toggle('active',i===idx);});}
+      function go(i){idx=(i+n)%n;render();}
+      function restart(){if(delay>0){clearInterval(timer);timer=setInterval(function(){go(idx+1);},delay);}}
+      if(prev)prev.addEventListener('click',function(){go(idx-1);restart();});
+      if(next)next.addEventListener('click',function(){go(idx+1);restart();});
+      root.addEventListener('mouseenter',function(){clearInterval(timer);});
+      root.addEventListener('mouseleave',restart);
+      render();restart();
+    }
+    function boot(){Array.prototype.forEach.call(document.querySelectorAll('.simple-carousel'),initCarousel);}
+    if(document.readyState!=='loading'){boot();}else{document.addEventListener('DOMContentLoaded',boot);}
+  })();
+  </script>
 
   </body>
   </html>
