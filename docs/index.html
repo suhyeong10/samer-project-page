@@ -341,16 +341,16 @@
           </p>
         </div>
         <div class="columns" style="margin-top:0.5rem;">
-          <div class="column">
-            <div class="box" style="height:100%;">
+          <div class="column is-4">
+            <div class="box" style="height:100%; min-width:0;">
               <h3 class="title is-5"><span class="icon has-text-info"><i class="fas fa-object-group"></i></span> Feature-Spatial Merging</h3>
               <p>Compresses the many post-projector visual tokens into a small set of representative centroids by
               soft assignment over a distance that combines feature similarity and 2D spatial coherence.</p>
               <div class="card-eq">\[ d(i,k)=\bigl(1-v_i^\top\mu_k\bigr)+\gamma\lVert p_i-s_k\rVert^2 \]</div>
             </div>
           </div>
-          <div class="column">
-            <div class="box" style="height:100%;">
+          <div class="column is-4">
+            <div class="box" style="height:100%; min-width:0;">
               <h3 class="title is-5"><span class="icon has-text-info"><i class="fas fa-vector-square"></i></span> Object-Aware Merge Prior</h3>
               <p>During training only, object annotations add an instance-inconsistency penalty that discourages
               merging tokens from different object instances &mdash; no auxiliary grounding loss, no boxes at
@@ -358,11 +358,12 @@
               <div class="card-eq">\[ \begin{gathered} P_k(b)=\frac{\sum_{i=1}^{N}\mathbf{1}[c_i=k]\,\mathbf{1}[b_i=b]}{\sum_{i=1}^{N}\mathbf{1}[c_i=k]+\epsilon}, \\[4pt] P_{\mathrm{inst}}(i,k)=1-P_k(b_i). \end{gathered} \]</div>
             </div>
           </div>
-          <div class="column">
-            <div class="box" style="height:100%;">
+          <div class="column is-4">
+            <div class="box" style="height:100%; min-width:0;">
               <h3 class="title is-5"><span class="icon has-text-info"><i class="fas fa-layer-group"></i></span> Projection-Only Adaptation</h3>
-              <p>Freezes the vision encoder and language backbone and trains only the shared projection layer, so
-              merged tokens stay compatible with MaxSim scoring.</p>
+              <p>Freezes the vision encoder and language backbone and trains only the shared projection layer with a
+              contrastive retrieval objective, pulling each query toward its positive images and pushing away the
+              other images in the batch so the compressed representatives stay aligned with MaxSim scoring.</p>
               <div class="card-eq">\[ \mathcal{L}_{\mathrm{ret}}=-\log\frac{\sum_{I^{+}\in\mathcal{P}(q)}\exp\!\bigl(S_K(q,I^{+})/\tau\bigr)}{\sum_{I\in\mathcal{B}}\exp\!\bigl(S_K(q,I)/\tau\bigr)} \]</div>
             </div>
           </div>
