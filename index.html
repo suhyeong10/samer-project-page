@@ -543,6 +543,24 @@
         </div>
         <p class="table-caption"><strong>Table 5.</strong> SaMer reduces image-side storage and MaxSim operations while improving query throughput under the same late-interaction interface. On ColPali/Flickr30K, SaMer cuts storage 16.09&times; and MaxSim ops 16.1&times; while raising QPS 4.3&times; (9.1&times; on MSCOCO); on ColQwen2 the gains are 3.7&ndash;3.73&times; storage/ops with up to 3.1&times; QPS. Values are improvements over the corresponding full multi-vector retriever.</p>
 
+        <!-- Figure 4: qualitative grounding examples -->
+        <h3 class="title is-5">Qualitative grounding examples</h3>
+        <div class="content has-text-justified">
+          <p>
+            Red denotes the phrase-relevance map and green denotes the ground-truth box for the highlighted
+            phrase. Across both settings, SaMer better concentrates phrase relevance inside the annotated region,
+            while compression baselines often spread relevance to nearby objects or background regions.
+          </p>
+        </div>
+        <figure class="image" style="margin: 0 0 0.75rem;">
+          <img src="static/images/qualitative_single_vs_multi.png" alt="Qualitative grounding: comparison with single-vector baselines, full multi-vector retrievers, and SaMer variants." loading="lazy" style="width:100%; height:auto; border-radius:6px;"/>
+        </figure>
+        <p class="table-caption"><strong>(a)</strong> Comparison with single-vector baselines, full multi-vector retrievers, and SaMer variants.</p>
+        <figure class="image" style="margin: 0 0 0.75rem;">
+          <img src="static/images/qualitative_compression.png" alt="Qualitative grounding: comparison with compression methods applied to multi-vector retrievers." loading="lazy" style="width:100%; height:auto; border-radius:6px;"/>
+        </figure>
+        <p class="table-caption"><strong>Figure 4.</strong> Qualitative grounding examples. <strong>(b)</strong> Comparison with compression methods applied to multi-vector retrievers. SaMer keeps relevance concentrated on the ground-truth region under compression.</p>
+
       </div>
     </div>
   </div>
