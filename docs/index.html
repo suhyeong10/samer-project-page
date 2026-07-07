@@ -363,7 +363,7 @@
               <h3 class="title is-5"><span class="icon has-text-info"><i class="fas fa-layer-group"></i></span> Projection-Only Adaptation</h3>
               <p>Freezes the vision encoder and language backbone and trains only the shared projection layer, so
               merged tokens stay compatible with MaxSim scoring.</p>
-              <div class="card-eq">\[ S_K(q,I)=\tfrac{1}{M}\sum_{j}\max_{k}\,q_j^\top r_k \]</div>
+              <div class="card-eq">\[ \mathcal{L}_{\mathrm{ret}}=-\log\frac{\sum_{I^{+}\in\mathcal{P}(q)}\exp\!\bigl(S_K(q,I^{+})/\tau\bigr)}{\sum_{I\in\mathcal{B}}\exp\!\bigl(S_K(q,I)/\tau\bigr)} \]</div>
             </div>
           </div>
         </div>
