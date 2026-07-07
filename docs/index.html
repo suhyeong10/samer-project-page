@@ -110,11 +110,17 @@
 
     /* Simple one-per-screen carousel */
     .simple-carousel { position: relative; margin: 0 auto; max-width: 1120px; }
-    .sc-viewport { overflow: hidden; transition: height 0.45s ease; }
-    .sc-track { display: flex; align-items: flex-start; transition: transform 0.45s ease; will-change: transform; }
-    .sc-slide { flex: 0 0 100%; min-width: 100%; box-sizing: border-box; padding: 0.5rem 3rem 0.5rem; text-align: center;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .sc-slide img { display: block; margin: 0 auto; max-width: 100%; height: auto; }
+    .sc-viewport { overflow: hidden; height: 600px; border-radius: 16px; border: 1px solid #e6e8ee;
+      background: #fff; box-shadow: 0 1px 3px rgba(16,24,40,0.06); }
+    .sc-track { display: flex; height: 100%; transition: transform 0.45s ease; will-change: transform; }
+    .sc-slide { flex: 0 0 100%; min-width: 100%; height: 100%; box-sizing: border-box; padding: 1.25rem 3.25rem;
+      display: flex; align-items: center; justify-content: center; }
+    .sc-slide img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto;
+      object-fit: contain; }
+    @media (max-width: 768px) {
+      .sc-viewport { height: 340px; }
+      .sc-slide { padding: 0.75rem 2.5rem; }
+    }
     .sc-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
       width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
       background: rgba(37,99,235,0.85); color: #fff; font-size: 1.4rem; line-height: 1;
@@ -395,10 +401,10 @@
         <p class="carousel-hint">Auto-advances every few seconds &mdash; use the &#8249;&nbsp;&#8250; arrows to browse one table at a time.</p>
         <div class="simple-carousel" data-autoplay="6000">
           <div class="sc-viewport"><div class="sc-track">
-            <div class="sc-slide"><img src="static/images/paper/table2.png" alt="Table 2: Adapted compression at K=64 under projection-only adaptation" loading="lazy" style="max-width:680px;"></div>
-            <div class="sc-slide"><img src="static/images/paper/table3.png" alt="Table 3: Compression budget analysis as K varies" loading="lazy" style="max-width:680px;"></div>
-            <div class="sc-slide"><img src="static/images/paper/table4.png" alt="Table 4: Feature, spatial, and object-aware component ablation" loading="lazy" style="max-width:680px;"></div>
-            <div class="sc-slide"><img src="static/images/paper/table5.png" alt="Table 5: Storage, MaxSim ops, and QPS efficiency" loading="lazy" style="max-width:1000px;"></div>
+            <div class="sc-slide"><img src="static/images/paper/table2.png" alt="Table 2: Adapted compression at K=64 under projection-only adaptation" loading="lazy"></div>
+            <div class="sc-slide"><img src="static/images/paper/table3.png" alt="Table 3: Compression budget analysis as K varies" loading="lazy"></div>
+            <div class="sc-slide"><img src="static/images/paper/table4.png" alt="Table 4: Feature, spatial, and object-aware component ablation" loading="lazy"></div>
+            <div class="sc-slide"><img src="static/images/paper/table5.png" alt="Table 5: Storage, MaxSim ops, and QPS efficiency" loading="lazy"></div>
           </div></div>
           <button class="sc-btn sc-prev" aria-label="Previous table">&#8249;</button>
           <button class="sc-btn sc-next" aria-label="Next table">&#8250;</button>
@@ -409,10 +415,10 @@
         <p class="carousel-hint">Auto-advances every few seconds &mdash; use the &#8249;&nbsp;&#8250; arrows to browse one figure at a time.</p>
         <div class="simple-carousel" data-autoplay="6000">
           <div class="sc-viewport"><div class="sc-track">
-            <div class="sc-slide"><img src="static/images/paper/figure2.png" alt="Figure 2: Token budget vs R@5 trade-off" loading="lazy" style="max-width:680px;"></div>
-            <div class="sc-slide"><img src="static/images/paper/figure3.png" alt="Figure 3: Grounding comparison (BoxMass, RegionHit, CoverageIoU)" loading="lazy" style="max-width:680px;"></div>
-            <div class="sc-slide"><img src="static/images/qualitative_single_vs_multi.png" alt="Figure 4a: Qualitative grounding vs single-vector baselines and full multi-vector retrievers" loading="lazy" style="max-width:1100px;"></div>
-            <div class="sc-slide"><img src="static/images/qualitative_compression.png" alt="Figure 4b: Qualitative grounding vs compression methods applied to multi-vector retrievers" loading="lazy" style="max-width:1100px;"></div>
+            <div class="sc-slide"><img src="static/images/paper/figure2.png" alt="Figure 2: Token budget vs R@5 trade-off" loading="lazy"></div>
+            <div class="sc-slide"><img src="static/images/paper/figure3.png" alt="Figure 3: Grounding comparison (BoxMass, RegionHit, CoverageIoU)" loading="lazy"></div>
+            <div class="sc-slide"><img src="static/images/qualitative_single_vs_multi.png" alt="Figure 4a: Qualitative grounding vs single-vector baselines and full multi-vector retrievers" loading="lazy"></div>
+            <div class="sc-slide"><img src="static/images/qualitative_compression.png" alt="Figure 4b: Qualitative grounding vs compression methods applied to multi-vector retrievers" loading="lazy"></div>
           </div></div>
           <button class="sc-btn sc-prev" aria-label="Previous figure">&#8249;</button>
           <button class="sc-btn sc-next" aria-label="Next figure">&#8250;</button>
@@ -470,24 +476,18 @@
   <script>
   (function(){
     function initCarousel(root){
-      var viewport=root.querySelector('.sc-viewport'), track=root.querySelector('.sc-track'), slides=root.querySelectorAll('.sc-slide');
+      var track=root.querySelector('.sc-track'), slides=root.querySelectorAll('.sc-slide');
       var prev=root.querySelector('.sc-prev'), next=root.querySelector('.sc-next'), dotsWrap=root.querySelector('.sc-dots');
       var n=slides.length, idx=0, timer=null, delay=parseInt(root.getAttribute('data-autoplay')||'0',10), dots=[];
       if(!track||!n) return;
       if(dotsWrap){for(var i=0;i<n;i++){(function(i){var b=document.createElement('button');b.setAttribute('aria-label','Go to slide '+(i+1));b.addEventListener('click',function(){go(i);restart();});dotsWrap.appendChild(b);dots.push(b);})(i);}}
-      function fit(){if(viewport&&slides[idx])viewport.style.height=slides[idx].offsetHeight+'px';}
-      function render(){track.style.transform='translateX('+(-idx*100)+'%)';dots.forEach(function(d,i){d.classList.toggle('active',i===idx);});fit();}
+      function render(){track.style.transform='translateX('+(-idx*100)+'%)';dots.forEach(function(d,i){d.classList.toggle('active',i===idx);});}
       function go(i){idx=(i+n)%n;render();}
       function restart(){if(delay>0){clearInterval(timer);timer=setInterval(function(){go(idx+1);},delay);}}
       if(prev)prev.addEventListener('click',function(){go(idx-1);restart();});
       if(next)next.addEventListener('click',function(){go(idx+1);restart();});
       root.addEventListener('mouseenter',function(){clearInterval(timer);});
       root.addEventListener('mouseleave',restart);
-      // keep the frame sized to the active slide as images load / the window resizes
-      Array.prototype.forEach.call(root.querySelectorAll('img'),function(img){
-        if(!img.complete)img.addEventListener('load',fit);
-      });
-      window.addEventListener('resize',fit);
       render();restart();
     }
     function boot(){Array.prototype.forEach.call(document.querySelectorAll('.simple-carousel'),initCarousel);}
