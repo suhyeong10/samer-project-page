@@ -349,7 +349,7 @@
               <p>During training only, object annotations add an instance-inconsistency penalty that discourages
               merging tokens from different object instances &mdash; no auxiliary grounding loss, no boxes at
               inference.</p>
-              <div class="card-eq">\[ a_{i,k}\propto\exp\!\Bigl(-\tfrac{d(i,k)+P_{\mathrm{inst}}(i,k)}{\tau_s}\Bigr) \]</div>
+              <div class="card-eq">\[ P_k(b)=\frac{\sum_{i=1}^{N}\mathbf{1}[c_i=k]\,\mathbf{1}[b_i=b]}{\sum_{i=1}^{N}\mathbf{1}[c_i=k]+\epsilon},\qquad P_{\mathrm{inst}}(i,k)=1-P_k(b_i). \]</div>
             </div>
           </div>
           <div class="column">
